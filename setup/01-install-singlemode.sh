@@ -42,6 +42,12 @@ output {
       hosts => ["127.0.0.1"]
     }
   }
+  if "_grokparsefailure" in [tags] {
+    stdout { codec => rubydebug }
+  }
+  if "_debug" in [tags] {
+    stdout { codec => rubydebug }
+  }
 }
 EOF
 

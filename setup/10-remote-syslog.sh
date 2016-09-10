@@ -24,8 +24,10 @@ filter {
       add_field => {
       }
     }
-    mutate {
-      convert => { "fw_len" => "integer" }
+  }
+  if "iptables" in [tags] {
+    grok {
+      match => { "message" => "\[VFW-%{NOTSPACE:fw_name}-%{WORD:fw_rule}-%{WORD:fw_action}\]" }
     }
   }
   if [fw_src_ip] {
@@ -49,41 +51,12 @@ output {
     elasticsearch {
       hosts => ["127.0.0.1"]
       index => "syslog-%{+YYYY.MM.dd}"
-      template => "/home/azmin/hyeoncheon-elastic/setup/syslog-template.json"
+      template => "/home/azmin/hyeoncheon-elastic/setup/template-syslog.json"
       template_name => "syslog"
     }
   }
-  if "_grokparsefailure" in [tags] {
-    stdout { codec => rubydebug }
-  }
 }
 EOF
-
-#curl -XPUT http://localhost:9200/syslog-2016.09.08 -d'
-#{
-#      "mappings" : {
-#         "syslog" : {
-#            "properties" : {
-#               "src_geo" : {
-#                  "properties" : {
-#                     "ip" : { "type" : "ip" },
-#                     "location" : { "type" : "geo_point" }
-#                  }
-#               },
-#               "fw_dst_ip" : { "type" : "ip" },
-#               "fw_src_ip" : { "type" : "ip" },
-#               "fw_len" : { "type" : "long" },
-#               "dst_geo" : {
-#                  "properties" : {
-#                     "ip" : { "type" : "ip" },
-#                     "location" : { "type" : "geo_point" }
-#                  }
-#               }
-#            }
-#         }
-#      }
-#}'
-
 
 mkdir -p backups
 sudo cp -a /etc/ufw/before.rules backups/configure-backup.before-rules
