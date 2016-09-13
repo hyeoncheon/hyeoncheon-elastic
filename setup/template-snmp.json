@@ -1,0 +1,32 @@
+{
+  "template" : "snmp-*",
+  "settings": {
+    "index.refresh_interval": "5s"
+  },
+  "mappings" : {
+    "_default_" : {
+      "_all" : {"enabled" : false},
+      "properties" : {
+        "host": { "index": "not_analyzed", "type": "string" },
+        "device": { "index": "not_analyzed", "type": "string" },
+        "ifname": { "index": "not_analyzed", "type": "string" },
+        "ifindex": { "index": "not_analyzed", "type": "integer" },
+        "ifdescr": { "index": "not_analyzed", "type": "string" },
+        "iftype": { "index": "not_analyzed", "type": "integer" },
+        "ifmtu": { "index": "not_analyzed", "type": "integer" },
+        "ifphysaddress": { "index": "not_analyzed", "type": "string" },
+        "ifadminstatus": { "index": "not_analyzed", "type": "integer" },
+        "ifoperstatus": { "index": "not_analyzed", "type": "integer" },
+        "iflastchange": { "index": "not_analyzed", "type": "date" },
+        "ifinoctets": { "index": "not_analyzed", "type": "long" },
+        "ifinerrors": { "index": "not_analyzed", "type": "long" },
+        "ifoutoctets": { "index": "not_analyzed", "type": "long" },
+        "ifouterrors": { "index": "not_analyzed", "type": "long" },
+        "ifspeed": { "index": "not_analyzed", "type": "integer" },
+        "rx_bps": { "index": "not_analyzed", "type": "double" },
+        "tx_bps": { "index": "not_analyzed", "type": "double" },
+        "proxy": { "index": "not_analyzed", "type": "string" }
+      }
+    }
+  }
+}
