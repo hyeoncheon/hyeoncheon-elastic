@@ -1,2 +1,5 @@
 /setup/env.conf
 /setup/backups/
+
+.bundle/
+vendor/
