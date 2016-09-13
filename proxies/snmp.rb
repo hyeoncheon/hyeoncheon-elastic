@@ -17,7 +17,7 @@ shipper_port = 7450
 collect_interval = 60
 
 
-ifTable_columns = [ "ifIndex", "ifDescr", "ifInOctets", "ifOutOctets", "ifSpeed", "ifOperStatus" ]
+ifTable_columns = [ "ifIndex", "ifName", "ifInOctets", "ifOutOctets", "ifSpeed", "ifOperStatus" ]
 
 def c32diff(curr, prev)
   if curr >= prev
@@ -33,11 +33,11 @@ store = {}
 while true
   SNMP::Manager.open(:Host => device) do |manager|
     now = Time.now
-    manager.walk(ifTable_columns) do |idx, descr, inoctets, outoctets, spd, os|
-      if os.value == 1 and descr.value != "lo"
+    manager.walk(ifTable_columns) do |idx, name, inoctets, outoctets, spd, os|
+      if os.value == 1 and name.value != "lo"
         data = { :device => device, :timestamp => now.iso8601 }
         data[:ifindex] = idx.value.to_i
-        data[:ifdescr] = descr.value.to_s
+        data[:ifname] = name.value.to_s
         data[:ifinoctets] = inoctets.value.to_i
         data[:ifoutoctets] = outoctets.value.to_i
         data[:ifspeed] = spd.value.to_i

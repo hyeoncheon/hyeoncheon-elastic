@@ -11,7 +11,7 @@
         "device": { "index": "not_analyzed", "type": "string" },
         "ifname": { "index": "not_analyzed", "type": "string" },
         "ifindex": { "index": "not_analyzed", "type": "integer" },
-        "ifdescr": { "index": "not_analyzed", "type": "string" },
+        "ifname": { "index": "not_analyzed", "type": "string" },
         "iftype": { "index": "not_analyzed", "type": "integer" },
         "ifmtu": { "index": "not_analyzed", "type": "integer" },
         "ifphysaddress": { "index": "not_analyzed", "type": "string" },
