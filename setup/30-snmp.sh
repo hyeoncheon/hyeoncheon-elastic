@@ -39,7 +39,6 @@ output {
 EOF
 
 # upload mapping template
-curl -XDELETE localhost:9200/snmp-2016.09.13
 curl -XPUT localhost:9200/_template/snmp -d @template-snmp.json
 
 # install translate plugin

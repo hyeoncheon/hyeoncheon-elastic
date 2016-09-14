@@ -48,8 +48,8 @@ while true
           t_gap = now - Time.iso8601(prev[:timestamp])
           rx_diff = c32diff(data[:ifinoctets], prev[:ifinoctets])
           tx_diff = c32diff(data[:ifoutoctets], prev[:ifoutoctets])
-          data[:rx_bps] = rx_diff * 8 / t_gap
-          data[:tx_bps] = tx_diff * 8 / t_gap
+          data[:rx_bps] = rx_diff / t_gap
+          data[:tx_bps] = tx_diff / t_gap
         else
           data[:rx_bps] = 0
           data[:tx_bps] = 0
