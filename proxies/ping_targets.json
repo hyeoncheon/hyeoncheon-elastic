@@ -1,0 +1,9 @@
+[ 
+  {"name":"SKCC WWW","addr":"www.skcc.com","port":"http"},
+  {"name":"SKCC SOS","addr":"sos.skcc.com","port":"http"},
+  {"name":"SK NET","addr":"www.sk.co.kr","port":"http"},
+  {"name":"SK US","addr":"www.sk.com","port":"http"},
+  {"name":"Google Web","addr":"www.google.com","port":"http"},
+  {"name":"SL API Private","addr":"api.service.softlayer.com","port":"http"},
+  {"name":"SL API Public","addr":"api.softlayer.com","port":"https"}
+]

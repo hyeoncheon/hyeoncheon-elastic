@@ -2,6 +2,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     json (1.8.3)
+    net-ping (2.0.1)
     snmp (1.2.0)
 
 PLATFORMS
@@ -9,6 +10,7 @@ PLATFORMS
 
 DEPENDENCIES
   json
+  net-ping
   snmp
 
 BUNDLED WITH
