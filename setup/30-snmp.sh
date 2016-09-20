@@ -10,7 +10,7 @@ cat <<EOF |sudo tee /etc/logstash/conf.d/30-snmp.conf
 input {
   udp {
     type => snmp
-    tags => [ "no_default_out", "_debug" ]
+    tags => [ "no_default_out" ]
     port => "$port_snmp"
     codec => json_lines
     add_field => { "received_at" => "%{@timestamp}" }
@@ -39,6 +39,7 @@ output {
 EOF
 
 # upload mapping template
+#curl -XDELETE localhost:9200/snmp-2016.09.14
 curl -XPUT localhost:9200/_template/snmp -d @template-snmp.json
 
 # install translate plugin

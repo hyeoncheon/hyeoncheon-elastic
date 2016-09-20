@@ -37,7 +37,13 @@
       "properties" : {
         "@timestamp": { "type": "date" },
         "@version": { "type": "string", "index": "not_analyzed" },
-        "logsource" : { "type" : "string", "index": "not_analyzed" }
+        "logsource" : { "type" : "string", "index": "not_analyzed" },
+        "event" : { "type" : "string", "index": "not_analyzed" },
+        "isakmp_id" : { "type" : "integer", "index": "not_analyzed" },
+        "ipsec_id" : { "type" : "integer", "index": "not_analyzed" },
+        "ipsec_id_old" : { "type" : "integer", "index": "not_analyzed" },
+        "ipsec_peer_addr" : { "type" : "ip", "index": "not_analyzed" },
+        "ipsec_mode" : { "type" : "string", "index": "not_analyzed" }
       }
     }
   }

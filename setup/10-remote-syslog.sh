@@ -19,29 +19,91 @@ input {
 filter {
   if [type] == "syslog" {
     grok {
-      match => { "message" => "IN=(%{DATA:fw_if_in})? OUT=(%{DATA:fw_if_out})? (MAC=%{DATA} )?SRC=%{IP:fw_src_ip} DST=%{IP:fw_dst_ip} LEN=%{NUMBER:fw_len:int} %{GREEDYDATA:fw_tcp_opts} PROTO=%{WORD:fw_proto} SPT=%{INT:fw_src_port} DPT=%{INT:fw_dst_port} %{GREEDYDATA:fw_tcp_opts}" }
+      match => { "message" => "IN=(%{DATA:fw_if_in})? OUT=(%{DATA:fw_if_out})? (MAC=%{DATA} )?SRC=%{IP:fw_src_ip} DST=%{IP:fw_dst_ip} LEN=%{NUMBER:fw_len:int} %{GREEDYDATA:fw_tcp_opts} PROTO=%{WORD:fw_proto} (SPT=%{INT:fw_src_port} DPT=%{INT:fw_dst_port} )?%{GREEDYDATA:fw_tcp_opts}" }
       add_tag => [ "iptables" ]
-      add_field => {
+      add_field => { }
+    }
+    if "iptables" in [tags] {
+      grok {
+        match => { "message" => "\[VFW-%{NOTSPACE:fw_name}-%{WORD:fw_rule}-%{WORD:fw_action}\]" }
       }
-    }
-  }
-  if "iptables" in [tags] {
-    grok {
-      match => { "message" => "\[VFW-%{NOTSPACE:fw_name}-%{WORD:fw_rule}-%{WORD:fw_action}\]" }
-    }
-  }
-  if [fw_src_ip] {
-    geoip {
-      source => "fw_src_ip"
-      target => "src_geo"
-      fields => [ "city_name", "country_code3", "location", "ip" ]
-    }
-  }
-  if [fw_dst_ip] {
-    geoip {
-      source => "fw_dst_ip"
-      target => "dst_geo"
-      fields => [ "city_name", "country_code3", "location", "ip" ]
+      if [fw_src_ip] {
+        geoip {
+          source => "fw_src_ip"
+          target => "src_geo"
+          fields => [ "city_name", "country_code3", "location", "ip" ]
+        }
+      }
+      if [fw_dst_ip] {
+        geoip {
+          source => "fw_dst_ip"
+          target => "dst_geo"
+          fields => [ "city_name", "country_code3", "location", "ip" ]
+        }
+      }
+    } else {
+      if "_grokparsefailure" in [tags] {
+        grok {
+          match => { "message" => "Delete SA(.*) payload: deleting IPSEC" }
+          add_tag => [ "ipsec", "vpn" ]
+          remove_tag => [ "_grokparsefailure" ]
+        }
+      }
+      if "_grokparsefailure" in [tags] {
+        grok {
+          match => { "message" => "IPsec SA established" }
+          add_tag => [ "ipsec", "vpn" ]
+          add_field => { "event" => "ipsec sa established" }
+          remove_tag => [ "_grokparsefailure" ]
+        }
+      }
+      if "_grokparsefailure" in [tags] {
+        grok {
+          match => { "message" => "peer-%{IP:ipsec_peer_addr}-tunnel-vti.* #%{NUMBER:ipsec_id}: initiating Quick Mode %{GREEDYDATA:ipsec_mode} to replace #%{NUMBER:ipsec_id_old} {using isakmp#%{NUMBER:isakmp_id}}" }
+          add_tag => [ "ipsec", "vpn" ]
+          add_field => { "event" => "ipsec initiating quick mode" }
+          remove_tag => [ "_grokparsefailure" ]
+        }
+      }
+      if "_grokparsefailure" in [tags] {
+        grok {
+          match => { "message" => "Vendor ID payload" }
+          add_tag => [ "ipsec", "vpn" ]
+          remove_tag => [ "_grokparsefailure" ]
+        }
+      }
+      if "_grokparsefailure" in [tags] {
+        grok {
+          match => { "message" => "ISAKMP SA established" }
+          add_tag => [ "ipsec", "vpn" ]
+          add_field => { "event" => "isakmp sa established" }
+          remove_tag => [ "_grokparsefailure" ]
+        }
+      }
+      if "_grokparsefailure" in [tags] {
+        grok {
+          match => { "message" => "peer-%{IP:ipsec_peer_addr}-tunnel-vti.* #%{NUMBER:ipsec_id}: initiating Main Mode to replace #%{NUMBER:ipsec_id_old}" }
+          add_tag => [ "ipsec", "vpn" ]
+          add_field => { "event" => "ipsec initiating main mode" }
+          remove_tag => [ "_grokparsefailure" ]
+        }
+      }
+      if ("/USR/SBIN/CRON" == [program] or "CRON" == [program])
+        and [severity] > 5 {
+        mutate {
+          replace => { "program" => "CRON" }
+          add_tag => [ "_verbose" ]
+          remove_tag => [ "_grokparsefailure" ]
+        }
+      }
+      if "_grokparsefailure" in [tags] and [program] == "sudo" {
+        grok {
+          match => { "message" => "%{USERNAME:user} : TTY=%{NOTSPACE:tty} ; PWD=%{PATH:pwd} ; USER=%{USERNAME:switched_to} ; COMMAND=%{GREEDYDATA:command}" }
+          add_tag => [ "security" ]
+          add_field => { "event" => "sudo by %{user} as %{switched_to}" }
+          remove_tag => [ "_grokparsefailure" ]
+        }
+      }
     }
   }
 }
