@@ -36,17 +36,18 @@ input {
     path => [ "/var/log/elasticsearch/*.log", "/var/log/logstash/*.log" ]
   }
 }
+
 output {
-  if "no_default_out" not in [tags] {
+  if [@metadata][output] != "self" {
     elasticsearch {
       hosts => ["127.0.0.1"]
     }
   }
   if "_grokparsefailure" in [tags] {
-    stdout { codec => rubydebug }
+    stdout { codec => rubydebug { metadata => true } }
   }
   if "_debug" in [tags] {
-    stdout { codec => rubydebug }
+    stdout { codec => rubydebug { metadata => true } }
   }
 }
 EOF

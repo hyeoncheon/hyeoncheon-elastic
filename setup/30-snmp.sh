@@ -10,10 +10,10 @@ cat <<EOF |sudo tee /etc/logstash/conf.d/30-snmp.conf
 input {
   udp {
     type => snmp
-    tags => [ "no_default_out" ]
     port => "$port_snmp"
     codec => json_lines
     add_field => { "received_at" => "%{@timestamp}" }
+    add_field => { "[@metadata][output]" => "self" }
   }
 }
 

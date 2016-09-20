@@ -10,10 +10,10 @@ cat <<EOF |sudo tee /etc/logstash/conf.d/20-netflow.conf
 input {
   udp {
     type => "netflow"
-    tags => [ "no_default_out", "_debug" ]
     port => "$port_netflow"
     codec => netflow
-    add_field => [ "received_at", "%{@timestamp}" ]
+    add_field => { "received_at" => "%{@timestamp}" }
+    add_field => { "[@metadata][output]" => "self" }
   }
 }
 

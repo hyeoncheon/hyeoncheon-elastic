@@ -9,10 +9,10 @@
 cat <<EOF |sudo tee /etc/logstash/conf.d/10-remote-syslog.conf
 input {
   syslog {
-    tags => [ "no_default_out" ]
     port => "$port_syslog"
     type => "syslog"
-    add_field => [ "received_at", "%{@timestamp}" ]
+    add_field => { "received_at" => "%{@timestamp}" }
+    add_field => { "[@metadata][output]" => "self" }
   }
 }
 
