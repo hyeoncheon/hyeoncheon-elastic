@@ -1,0 +1,21 @@
+
+161.202.38.90 pod: hkg02
+161.202.38.90 account: cldz
+161.202.38.90 hostname: cldz.hkg02.ftz.vr01
+
+169.56.66.5 pod: seo01
+169.56.66.5 account: skcc
+169.56.66.5 hostname: skcc.seo01.ftz.vr01
+
+161.202.38.90 bond1: fcz
+161.202.38.90 bond0: bcz
+161.202.38.90 bond0.1731: dbz
+161.202.38.90 bond0.1243: app
+161.202.38.90 bond0.855: dev
+161.202.38.90 vti0: ddc
+
+169.56.66.5 bond1: fcz
+169.56.66.5 bond0: bcz
+169.56.66.5 bond0.803: app
+169.56.66.5 vti0: ddc
+

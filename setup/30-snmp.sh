@@ -25,6 +25,45 @@ filter {
     mutate {
       add_field => { "proxy" => "%{host}" }
     }
+    if [device] {
+      mutate {
+        add_field => { "[nms][pod]" => "%{device} pod" }
+        add_field => { "[nms][zone]" => "%{device} %{ifname}" }
+        add_field => { "[nms][account]" => "%{device} account" }
+        add_field => { "[nms][hostname]" => "%{device} hostname" }
+      }
+      translate {
+        field => "[nms][pod]"
+        destination => "[nms][pod]"
+        override => true
+        dictionary_path => "/home/azmin/hyeoncheon-elastic/setup/dict.device-map.yml"
+      }
+      translate {
+        field => "[nms][zone]"
+        destination => "[nms][zone]"
+        override => true
+        dictionary_path => "/home/azmin/hyeoncheon-elastic/setup/dict.device-map.yml"
+      }
+      translate {
+        field => "[nms][account]"
+        destination => "[nms][account]"
+        override => true
+        dictionary_path => "/home/azmin/hyeoncheon-elastic/setup/dict.device-map.yml"
+      }
+      translate {
+        field => "[nms][hostname]"
+        destination => "[nms][hostname]"
+        override => true
+        dictionary_path => "/home/azmin/hyeoncheon-elastic/setup/dict.device-map.yml"
+      }
+    } else {
+      mutate {
+        add_field => { "[nms][pod]" => "global" }
+        add_field => { "[nms][zone]" => "global" }
+        add_field => { "[nms][account]" => "global" }
+        add_field => { "[nms][hostname]" => "global" }
+      }
+    }
   }
 }
 
@@ -39,12 +78,11 @@ output {
 EOF
 
 # upload mapping template
-#curl -XDELETE localhost:9200/snmp-2016.09.14
 curl -XPUT localhost:9200/_template/snmp -d @template-snmp.json
 
 # install translate plugin
-#/opt/logstash/bin/logstash-plugin list |grep -q filter-translate || \
-#	sudo /opt/logstash/bin/logstash-plugin install logstash-filter-translate
+/opt/logstash/bin/logstash-plugin list |grep -q filter-translate || \
+	sudo /opt/logstash/bin/logstash-plugin install logstash-filter-translate
 
 cat <<EOF |sudo tee /etc/ufw/applications.d/hce-snmp
 [HCE-Logstash-SNMP]

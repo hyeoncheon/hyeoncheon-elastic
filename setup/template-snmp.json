@@ -25,7 +25,17 @@
         "ifspeed": { "index": "not_analyzed", "type": "integer" },
         "rx_bps": { "index": "not_analyzed", "type": "double" },
         "tx_bps": { "index": "not_analyzed", "type": "double" },
-        "proxy": { "index": "not_analyzed", "type": "string" }
+        "proxy": { "index": "not_analyzed", "type": "string" },
+        "nms": {
+          "dynamic": true,
+          "type": "object",
+          "properties": {
+            "hostname": { "index": "not_analyzed", "type": "string" },
+            "account": { "index": "not_analyzed", "type": "string" },
+            "zone": { "index": "not_analyzed", "type": "string" },
+            "pod": { "index": "not_analyzed", "type": "string" }
+          }
+        }
       }
     }
   }
