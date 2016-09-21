@@ -1,5 +1,5 @@
 {
-  "template" : "nms-*",
+  "template" : "netflow-*",
   "settings": {
     "index.refresh_interval": "5s"
   },
@@ -13,10 +13,13 @@
           "dynamic": true,
           "type": "object",
           "properties": {
-            "protocol": { "index": "not_analyzed", "type": "string" },
-            "interface": { "index": "not_analyzed", "type": "string" },
+            "hostname": { "index": "not_analyzed", "type": "string" },
+            "account": { "index": "not_analyzed", "type": "string" },
+            "pod": { "index": "not_analyzed", "type": "string" },
+            "zone": { "index": "not_analyzed", "type": "string" },
             "direction": { "index": "not_analyzed", "type": "string" },
-            "sequence": { "index": "not_analyzed", "type": "string" },
+            "protocol": { "index": "not_analyzed", "type": "string" },
+            "session": { "index": "not_analyzed", "type": "string" },
             "duration": { "index": "not_analyzed", "type": "float" },
             "bps": { "index": "not_analyzed", "type": "float" }
           }
@@ -42,7 +45,7 @@
             "first_switched": { "index": "not_analyzed", "type": "date" },
             "last_switched": { "index": "not_analyzed", "type": "date" },
             "l4_src_port": { "index": "analyzed", "type": "long" },
-            "l4_dst_port": { "index": "analyzed", "type": "long" }, 
+            "l4_dst_port": { "index": "analyzed", "type": "long" },
             "tcp_flags": { "index": "analyzed", "type": "integer" },
             "protocol": { "index": "analyzed", "type": "integer" },
             "src_tos": { "index": "analyzed", "type": "integer" },

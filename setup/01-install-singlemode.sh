@@ -59,9 +59,7 @@ title=HCE-Kibana
 description=Kibana
 ports=$kibana_port/tcp
 EOF
-
 sudo ufw allow from $admin_network to any app HCE-Kibana
-sudo ufw reload
 
 ### start services -----------------------------------------------------------
 sudo systemctl daemon-reload
@@ -70,6 +68,4 @@ sudo systemctl enable logstash.service
 sudo systemctl enable kibana.service
 sudo systemctl restart elasticsearch.service
 sudo systemctl restart kibana.service
-sleep 10
-sudo systemctl restart logstash.service
 

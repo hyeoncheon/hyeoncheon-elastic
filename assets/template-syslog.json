@@ -17,21 +17,23 @@
           }
         }
       }, {
-        "firewall_fields": {
-          "match":   "fw_*",
-          "match_mapping_type" : "string",
-          "mapping": { "type": "string", "index": "not_analyzed" }
-        }
-      }, {
         "geoips": {
           "match":   "*_geo",
           "match_mapping_type" : "*",
           "mapping": {
             "properties" : {
+              "city_name" : { "index": "not_analyzed", "type": "string" },
+              "country_code3" : { "index": "not_analyzed", "type": "string" },
               "location" : { "type": "geo_point" },
               "ip" : { "type": "ip" }
             }
           }
+        }
+      }, {
+        "firewall_fields": {
+          "match":   "fw_*",
+          "match_mapping_type" : "string",
+          "mapping": { "type": "string", "index": "not_analyzed" }
         }
       } ],
       "properties" : {
@@ -43,7 +45,23 @@
         "ipsec_id" : { "type" : "integer", "index": "not_analyzed" },
         "ipsec_id_old" : { "type" : "integer", "index": "not_analyzed" },
         "ipsec_peer_addr" : { "type" : "ip", "index": "not_analyzed" },
-        "ipsec_mode" : { "type" : "string", "index": "not_analyzed" }
+        "ipsec_mode" : { "type" : "string", "index": "not_analyzed" },
+        "sudo_by" : { "type" : "string", "index": "not_analyzed" },
+        "sudo_tty" : { "type" : "string", "index": "not_analyzed" },
+        "sudo_pwd" : { "type" : "string", "index": "not_analyzed" },
+        "sudo_user" : { "type" : "string", "index": "not_analyzed" },
+        "sudo_command" : { "type" : "string", "index": "not_analyzed" },
+        "nms": {
+          "dynamic": true,
+          "type": "object",
+          "properties": {
+            "hostname": { "index": "not_analyzed", "type": "string" },
+            "account": { "index": "not_analyzed", "type": "string" },
+            "zone": { "index": "not_analyzed", "type": "string" },
+            "from": { "index": "not_analyzed", "type": "string" },
+            "pod": { "index": "not_analyzed", "type": "string" }
+          }
+        }
       }
     }
   }

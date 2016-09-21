@@ -1,0 +1,57 @@
+
+192.168.10.5 pod: seo01
+192.168.10.5 account: acc1
+192.168.10.5 hostname: acc1.seo01.ftz.vr01
+192.168.10.5 if bond1: fcz
+192.168.10.5 if bond0: bcz
+192.168.10.5 if bond0.803: app
+192.168.10.5 if vti0: pdc
+192.168.10.5 ifno 8: fcz
+192.168.10.5 ifno 9: bcz
+192.168.10.5 ifno 13: pdc
+192.168.10.5 ifno 14: app
+
+192.168.10.2 pod: seo01
+192.168.10.2 account: acc1
+192.168.10.2 hostname: acc1.seo01.ftz.vr02
+192.168.10.2 if bond1: fcz
+192.168.10.2 if bond0: bcz
+192.168.10.2 if bond0.803: app
+192.168.10.2 if vti0: pdc
+192.168.10.2 ifno 8: fcz
+192.168.10.2 ifno 9: bcz
+192.168.10.2 ifno 13: pdc
+192.168.10.2 ifno 14: app
+
+192.168.20.90 pod: hkg02
+192.168.20.90 account: cttn
+192.168.20.90 hostname: cttn.hkg02.ftz.vr01
+192.168.20.90 if bond1: fcz
+192.168.20.90 if bond0: bcz
+192.168.20.90 if bond0.1731: dbz
+192.168.20.90 if bond0.1243: app
+192.168.20.90 if bond0.855: dev
+192.168.20.90 if vti0: pdc
+192.168.20.90 ifno 8: fcz
+192.168.20.90 ifno 9: bcz
+192.168.20.90 ifno 10: dbz
+192.168.20.90 ifno 11: dev
+192.168.20.90 ifno 12: app
+192.168.20.90 ifno 279: pdc
+
+192.168.20.91 pod: hkg02
+192.168.20.91 account: cttn
+192.168.20.91 hostname: cttn.hkg02.ftz.vr02
+192.168.20.91 if bond1: fcz
+192.168.20.91 if bond0: bcz
+192.168.20.91 if bond0.1731: dbz
+192.168.20.91 if bond0.1243: app
+192.168.20.91 if bond0.855: dev
+192.168.20.91 if vti0: pdc
+192.168.20.91 ifno 8: fcz
+192.168.20.91 ifno 9: bcz
+192.168.20.91 ifno 10: dbz
+192.168.20.91 ifno 11: dev
+192.168.20.91 ifno 12: app
+192.168.20.91 ifno 279: pdc
+

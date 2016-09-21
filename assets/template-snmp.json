@@ -26,6 +26,11 @@
         "rx_bps": { "index": "not_analyzed", "type": "double" },
         "tx_bps": { "index": "not_analyzed", "type": "double" },
         "proxy": { "index": "not_analyzed", "type": "string" },
+        "ping_name": { "index": "not_analyzed", "type": "string" },
+        "ping_addr": { "index": "not_analyzed", "type": "string" },
+        "ping_port": { "index": "not_analyzed", "type": "string" },
+        "ping_count": { "index": "not_analyzed", "type": "integer" },
+        "ping_rtt_ms": { "index": "not_analyzed", "type": "float" },
         "nms": {
           "dynamic": true,
           "type": "object",

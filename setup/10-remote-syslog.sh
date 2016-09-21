@@ -18,30 +18,84 @@ input {
 
 filter {
   if [type] == "syslog" {
+    mutate {
+      add_field => { "[nms][pod]" => "%{host} pod" }
+      add_field => { "[nms][account]" => "%{host} account" }
+      add_field => { "[nms][hostname]" => "%{host} hostname" }
+    }
+    translate {
+      field => "[nms][pod]"
+      destination => "[nms][pod]"
+      override => true
+      dictionary_path => "$config_dir/dict.device-map.yml"
+    }
+    translate {
+      field => "[nms][account]"
+      destination => "[nms][account]"
+      override => true
+      dictionary_path => "$config_dir/dict.device-map.yml"
+    }
+    translate {
+      field => "[nms][hostname]"
+      destination => "[nms][hostname]"
+      override => true
+      dictionary_path => "$config_dir/dict.device-map.yml"
+    }
     grok {
       match => { "message" => "IN=(%{DATA:fw_if_in})? OUT=(%{DATA:fw_if_out})? (MAC=%{DATA} )?SRC=%{IP:fw_src_ip} DST=%{IP:fw_dst_ip} LEN=%{NUMBER:fw_len:int} %{GREEDYDATA:fw_tcp_opts} PROTO=%{WORD:fw_proto} (SPT=%{INT:fw_src_port} DPT=%{INT:fw_dst_port} )?%{GREEDYDATA:fw_tcp_opts}" }
-      add_tag => [ "iptables" ]
-      add_field => { }
+      add_tag => [ "firewall" ]
     }
-    if "iptables" in [tags] {
+    if "firewall" in [tags] {
       grok {
         match => { "message" => "\[VFW-%{NOTSPACE:fw_name}-%{WORD:fw_rule}-%{WORD:fw_action}\]" }
       }
       if [fw_src_ip] {
         geoip {
           source => "fw_src_ip"
-          target => "src_geo"
-          fields => [ "city_name", "country_code3", "location", "ip" ]
+          target => "fw_src_geo"
+          fields => [ "city_name", "country_code3", "location" ]
         }
       }
       if [fw_dst_ip] {
         geoip {
           source => "fw_dst_ip"
-          target => "dst_geo"
-          fields => [ "city_name", "country_code3", "location", "ip" ]
+          target => "fw_dst_geo"
+          fields => [ "city_name", "country_code3", "location" ]
         }
       }
+      mutate {
+        add_field => { "[nms][from]" => "%{host} if %{fw_if_in}" }
+        add_field => { "[nms][zone]" => "%{host} if %{fw_if_out}" }
+      }
+      translate {
+        field => "[nms][zone]"
+        destination => "[nms][zone]"
+        override => true
+        fallback => "local"
+        dictionary_path => "$config_dir/dict.device-map.yml"
+      }
+      translate {
+        field => "[nms][from]"
+        destination => "[nms][from]"
+        override => true
+        fallback => "local"
+        dictionary_path => "$config_dir/dict.device-map.yml"
+      }
     } else {
+      if "_grokparsefailure" in [tags] {
+        grok {
+          match => { "message" => "Peer ID is ID_IPV4_ADDR" }
+          add_tag => [ "ipsec", "vpn" ]
+          remove_tag => [ "_grokparsefailure" ]
+        }
+      }
+      if "_grokparsefailure" in [tags] {
+        grok {
+          match => { "message" => "Delete SA payload: deleting ISAKMP" }
+          add_tag => [ "ipsec", "vpn" ]
+          remove_tag => [ "_grokparsefailure" ]
+        }
+      }
       if "_grokparsefailure" in [tags] {
         grok {
           match => { "message" => "Delete SA(.*) payload: deleting IPSEC" }
@@ -98,9 +152,9 @@ filter {
       }
       if "_grokparsefailure" in [tags] and [program] == "sudo" {
         grok {
-          match => { "message" => "%{USERNAME:user} : TTY=%{NOTSPACE:tty} ; PWD=%{PATH:pwd} ; USER=%{USERNAME:switched_to} ; COMMAND=%{GREEDYDATA:command}" }
+          match => { "message" => "%{USERNAME:sudo_by} : TTY=%{NOTSPACE:sudo_tty} ; PWD=%{PATH:sudo_pwd} ; USER=%{USERNAME:sudo_user} ; COMMAND=%{GREEDYDATA:sudo_command}" }
           add_tag => [ "security" ]
-          add_field => { "event" => "sudo by %{user} as %{switched_to}" }
+          add_field => { "event" => "sudo by %{sudo_by} as %{sudo_user}" }
           remove_tag => [ "_grokparsefailure" ]
         }
       }
@@ -113,13 +167,18 @@ output {
     elasticsearch {
       hosts => ["127.0.0.1"]
       index => "syslog-%{+YYYY.MM.dd}"
-      template => "/home/azmin/hyeoncheon-elastic/setup/template-syslog.json"
+      template => "$assets_dir/template-syslog.json"
       template_name => "syslog"
     }
   }
 }
 EOF
 
+# upload mapping template
+curl -XPUT localhost:9200/_template/syslog \
+           -d @$assets_dir/template-syslog.json
+
+# update firewall
 mkdir -p backups
 sudo cp -a /etc/ufw/before.rules backups/configure-backup.before-rules
 sudo sed -i '/HCE START/,/HCE END/d' /etc/ufw/before.rules
@@ -146,6 +205,4 @@ ports=$port_syslog/udp
 EOF
 
 sudo ufw allow from any to any app HCE-Logstash
-sudo ufw reload
 
-sudo systemctl restart logstash.service
