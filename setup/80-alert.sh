@@ -17,7 +17,7 @@ filter {
         clones => [ "alert" ]
       }
     }
-    if [ping_name] and ([ping_count] < 3 or [ping_rtt_ms] > $snmp_low_letancy) {
+    if [ping_count] and ([ping_count] < 3 or [ping_rtt_ms] > $snmp_low_latency) {
       mutate { add_tag => [ "alert" ] }
       clone {
         add_field => { "trap" => "snmp_low_latency" }
@@ -32,32 +32,26 @@ filter {
     if [trap] == "snmp_high_traffic" {
       ruby {
         code => "
-          event['alert_info'] = [{
-            'title' => 'Hostname', 'value' => event['[nms][hostname]'],
-          }, {
-            'title' => 'Throughput (Bytes/sec)',
-            'value' => 'RX ' + event['rx_bps'].round(3).to_digits +
-                      ' TX ' + event['tx_bps'].round(3).to_digits,
-          }]"
+          event['alert_what'] = 'RX ' + event['rx_bps'].round.to_s + ' B/s ' +
+                                'TX ' + event['tx_bps'].round.to_s + ' B/s';
+        "
       }
       mutate {
-        add_field => { "alert_message" => "High Traffic! %{ifname}" }
+        add_field => { "alert_where" => "%{[nms][hostname]} zone %{[nms][zone]}" }
+        add_field => { "alert_message" => "*High Traffic!* %{[nms][hostname]} port %{ifname}" }
         add_field => { "alert_color" => "danger" }
       }
     }
     if [trap] == "snmp_low_latency" {
       ruby {
         code => "
-          event['alert_info'] = [{
-            'title' => 'Target', 'value' => event['[ping_name]'],
-          }, {
-            'title' => 'Ping Status',
-            'value' => 'RTT: ' + event['ping_rtt_ms'].round(3).to_digits +
-                        'ms (' + event['ping_count'].to_s + ' times)',
-          }]"
+          event['alert_what'] = 'RTT: ' + event['ping_rtt_ms'].round.to_s +
+                                'ms (' + event['ping_count'].to_s + ' times)';
+        "
       }
       mutate {
-        add_field => { "alert_message" => "Low Latency! to %{ping_addr}" }
+        add_field => { "alert_where" => "%{ping_addr}" }
+        add_field => { "alert_message" => "*Low Latency!* ping to %{ping_name}" }
         add_field => { "alert_color" => "warning" }
       }
     }
@@ -72,7 +66,11 @@ filter {
         event['attachments'] = [{
           'color' => event['alert_color'],
           'text' => event['alert_message'],
-          'fields' => event['alert_info'],
+          'fields' => [{
+            'title' => 'Where', 'value' => event['alert_where'],
+          }, {
+            'title' => 'What', 'value' => event['alert_what'],
+          }],
           'pretext' => '$slack_pretext',
           'title' => 'Hyeoncheon NMS Alert (' + event['origin'] + ')',
           'title_link' => 'https://github.com/hyeoncheon/hyeoncheon-elastic',
