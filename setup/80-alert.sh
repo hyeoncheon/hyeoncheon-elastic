@@ -21,23 +21,41 @@ filter {
       mutate { add_tag => [ "alert" ] }
       clone {
         add_field => { "trap" => "snmp_low_latency" }
-        add_field => { "origin" => "snmp" }
+        add_field => { "origin" => "ping" }
         clones => [ "alert" ]
+      }
+    }
+  }
+
+  if [type] == "syslog" {
+    if "$hc_alrt" in [message] or ([severity] and [severity] < 4) {
+      if [program] not in [ "pptpd", "pppd" ] {
+        mutate { add_tag => [ "alert" ] }
+        clone {
+          add_field => { "trap" => "syslog_alert" }
+          add_field => { "origin" => "syslog" }
+          clones => [ "alert" ]
+        }
       }
     }
   }
 
 
   if [type] == "alert" {
+    mutate {
+      add_field => { "[@metadata][output]" => "self" }
+    }
     if [trap] == "snmp_high_traffic" {
       ruby {
         code => "
-          event['alert_what'] = 'RX ' + event['rx_bps'].round.to_s + ' B/s ' +
-                                'TX ' + event['tx_bps'].round.to_s + ' B/s';
+          event['alert_what'] = 'Rx: ' + event['rx_bps'].round.to_s + ' B/s
+' +
+                                'Tx: ' + event['tx_bps'].round.to_s + ' B/s';
         "
       }
       mutate {
-        add_field => { "alert_where" => "%{[nms][hostname]} zone %{[nms][zone]}" }
+        add_field => { "alert_where" => "%{[nms][hostname]}
+zone %{[nms][zone]}" }
         add_field => { "alert_message" => "*High Traffic!* %{[nms][hostname]} port %{ifname}" }
         add_field => { "alert_color" => "danger" }
       }
@@ -51,11 +69,31 @@ filter {
       }
       mutate {
         add_field => { "alert_where" => "%{ping_addr}" }
-        add_field => { "alert_message" => "*Low Latency!* ping to %{ping_name}" }
+        add_field => { "alert_message" => "*High Latency!* to %{ping_name}" }
         add_field => { "alert_color" => "warning" }
       }
     }
 
+    if [trap] == "syslog_alert" {
+      mutate {
+        lowercase => [ "severity_label" ]
+        add_field => { "alert_where" => "%{[nms][hostname]}" }
+        add_field => { "alert_what" => "%{program}" }
+        add_field => { "alert_message" => "*%{facility_label}.%{severity_label}*: %{message}" }
+        add_field => { "alert_color" => "warning" }
+      }
+      if [event] {
+        mutate {
+          replace => { "alert_what" => "%{program}: %{event}" }
+        }
+      }
+      if "EMERG" in [message] or [severity] < 3 {
+        mutate {
+          add_tag => [ "emerg" ]
+          replace => { "alert_color" => "danger" }
+        }
+      }
+    }
   }
 
 
@@ -65,18 +103,16 @@ filter {
       code => "
         event['attachments'] = [{
           'color' => event['alert_color'],
-          'text' => event['alert_message'],
           'fields' => [{
-            'title' => 'Where', 'value' => event['alert_where'],
+            'title' => 'Where', 'value' => event['alert_where'], 'short' => true
           }, {
-            'title' => 'What', 'value' => event['alert_what'],
+            'title' => 'What', 'value' => event['alert_what'], short: true
           }],
-          'pretext' => '$slack_pretext',
-          'title' => 'Hyeoncheon NMS Alert (' + event['origin'] + ')',
+          'fallback' => event['alert_message'],
+          'pretext' => '$slack_pretext
+> ' + event['alert_message'],
+          'title' => 'Hyeoncheon Elastic NMS Alert (' + event['origin'] + ')',
           'title_link' => 'https://github.com/hyeoncheon/hyeoncheon-elastic',
-          'author_name' => 'Hyeoncheon Elastic NMS',
-          'author_link' => 'https://github.com/hyeoncheon/hyeoncheon-elastic',
-          'author_icon' => 'http://hyeoncheon.github.io/images/hyeoncheon-icon.png',
           'footer' => 'Hyeoncheon by scinix',
           'footer_icon' => 'http://hyeoncheon.github.io/images/hyeoncheon-icon.png',
           'ts' => Time.iso8601(event['@timestamp'].to_s).to_i,
@@ -92,7 +128,7 @@ output {
     slack {
       url => "$slack_webhook"
       channel => "$slack_channel"
-      username => "Hyeoncheon NMS Alert"
+      username => "Hyeoncheon Elastic NMS"
       icon_emoji => "$slack_emoji"
       format => ""
     }
