@@ -83,10 +83,6 @@ EOF
 curl -XPUT localhost:9200/_template/snmp \
            -d @$assets_dir/template-snmp.json
 
-# install translate plugin
-/opt/logstash/bin/logstash-plugin list |grep -q filter-translate || \
-	sudo /opt/logstash/bin/logstash-plugin install logstash-filter-translate
-
 # setup firewall
 cat <<EOF |sudo tee /etc/ufw/applications.d/hce-snmp
 [HCE-Logstash-SNMP]

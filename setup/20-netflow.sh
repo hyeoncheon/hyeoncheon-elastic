@@ -106,10 +106,6 @@ EOF
 curl -XPUT localhost:9200/_template/netflow \
            -d @$assets_dir/template-netflow.json
 
-# install translate plugin
-/opt/logstash/bin/logstash-plugin list |grep -q filter-translate || \
-	sudo /opt/logstash/bin/logstash-plugin install logstash-filter-translate
-
 # setup firewall
 cat <<EOF |sudo tee /etc/ufw/applications.d/hce-netflow
 [HCE-Logstash-NetFlow]
