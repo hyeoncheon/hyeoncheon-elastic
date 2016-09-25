@@ -79,15 +79,15 @@ filter {
     date {
       match => [ "[netflow][last_switched]", "ISO8601" ]
     }
-  }
-  if [nms][direction] == "inbound" {
-    mutate {
-      add_field => { "[nms][session]" => "%{[netflow][ipv4_dst_addr]}:%{[netflow][l4_dst_port]}-%{[netflow][ipv4_src_addr]}:%{[netflow][l4_src_port]}" }
+    if [nms][direction] == "inbound" {
+      mutate {
+        add_field => { "[nms][session]" => "%{[netflow][ipv4_dst_addr]}:%{[netflow][l4_dst_port]}-%{[netflow][ipv4_src_addr]}:%{[netflow][l4_src_port]}" }
+      }
     }
-  }
-  if [nms][direction] == "outbound" {
-    mutate {
-      add_field => { "[nms][session]" => "%{[netflow][ipv4_src_addr]}:%{[netflow][l4_src_port]}-%{[netflow][ipv4_dst_addr]}:%{[netflow][l4_dst_port]}" }
+    if [nms][direction] == "outbound" {
+      mutate {
+        add_field => { "[nms][session]" => "%{[netflow][ipv4_src_addr]}:%{[netflow][l4_src_port]}-%{[netflow][ipv4_dst_addr]}:%{[netflow][l4_dst_port]}" }
+      }
     }
   }
 }
