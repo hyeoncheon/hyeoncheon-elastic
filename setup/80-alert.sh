@@ -40,6 +40,18 @@ filter {
     }
   }
 
+  if [type] == "netflow" {
+    if [netflow][in_bytes] and [netflow][in_bytes] >= $netflow_high_traffic and [nms][zone] == "fcz" {
+      mutate { add_tag => [ "alert" ] }
+      clone {
+        add_field => { "trap" => "netflow_high_traffic" }
+        add_field => { "origin" => "netflow" }
+        clones => [ "alert" ]
+      }
+    }
+  }
+
+
 
   if [type] == "alert" {
     mutate {
@@ -48,16 +60,17 @@ filter {
     if [trap] == "snmp_high_traffic" {
       ruby {
         code => "
-          event['alert_what'] = 'Rx: ' + event['rx_bps'].round.to_s + ' B/s
-' +
-                                'Tx: ' + event['tx_bps'].round.to_s + ' B/s';
+          event['alert_what'] = 'Rx: ' +
+            event['rx_bps'].round.to_s.gsub(/(\d)(?=(\d{3})+$)/,'\1,') + ' B/s
+Tx: ' +
+            event['tx_bps'].round.to_s.gsub(/(\d)(?=(\d{3})+$)/,'\1,') + ' B/s';
         "
       }
       mutate {
         add_field => { "alert_where" => "%{[nms][hostname]}
-zone %{[nms][zone]}" }
-        add_field => { "alert_message" => "*High Traffic!* %{[nms][hostname]} port %{ifname}" }
-        add_field => { "alert_color" => "danger" }
+%{[nms][zone]} (%{ifname})" }
+        add_field => { "alert_message" => "*High Traffic!* %{[nms][account]} %{[nms][zone]} zone (%{[nms][hostname]} %{ifname})" }
+        add_field => { "alert_color" => "warning" }
       }
     }
     if [trap] == "snmp_low_latency" {
@@ -94,7 +107,23 @@ zone %{[nms][zone]}" }
         }
       }
     }
+
+    if [trap] == "netflow_high_traffic" {
+      mutate {
+        add_field => { "alert_color" => "warning" }
+        add_field => { "alert_where" => "%{[nms][hostname]}
+zone %{[nms][zone]}" }
+        add_field => { "alert_what" => "%{[nms][session]}
+%{[netflow][in_bytes]} Bytes" }
+      }
+      if [nms][direction] == "inbound" {
+        mutate { add_field => { "alert_message" => "*High Traffic!* %{[netflow][in_bytes]} Bytes comes from %{[nms][zone]} (%{[nms][session]}, %{[nms][direction]})" } }
+      } else {
+        mutate { add_field => { "alert_message" => "*High Traffic!* %{[netflow][in_bytes]} Bytes goes to %{[nms][zone]} (%{[nms][session]}, %{[nms][direction]})" } }
+      }
+    }
   }
+
 
 
   if "alert" == [type] {
@@ -110,7 +139,7 @@ zone %{[nms][zone]}" }
           }],
           'fallback' => event['alert_message'],
           'pretext' => '$slack_pretext
-> ' + event['alert_message'],
+>' + event['alert_message'],
           'title' => 'Hyeoncheon Elastic NMS Alert (' + event['origin'] + ')',
           'title_link' => 'https://github.com/hyeoncheon/hyeoncheon-elastic',
           'footer' => 'Hyeoncheon by scinix',
