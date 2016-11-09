@@ -38,6 +38,14 @@ filter {
         }
       }
     }
+    if [remote_action] {
+      mutate { add_tag => [ "alert" ] }
+      clone {
+        add_field => { "trap" => "syslog_remote" }
+        add_field => { "origin" => "syslog" }
+        clones => [ "alert" ]
+      }
+    }
   }
 
   if [type] == "netflow" {
@@ -87,7 +95,7 @@ Tx: ' +
       }
     }
 
-    if [trap] == "syslog_alert" {
+    if [trap] in [ "syslog_alert", "syslog_remote" ] {
       mutate {
         lowercase => [ "severity_label" ]
         add_field => { "alert_where" => "%{[nms][hostname]}" }
@@ -105,6 +113,11 @@ Tx: ' +
           add_tag => [ "emerg" ]
           replace => { "alert_color" => "danger" }
         }
+      }
+    }
+    if [remote_action] and [remote_action] == "failed" {
+      mutate {
+        replace => { "alert_color" => "danger" }
       }
     }
 

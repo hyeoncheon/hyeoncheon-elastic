@@ -51,6 +51,10 @@
         "sudo_pwd" : { "type" : "string", "index": "not_analyzed" },
         "sudo_user" : { "type" : "string", "index": "not_analyzed" },
         "sudo_command" : { "type" : "string", "index": "not_analyzed" },
+        "remote_action" : { "type" : "string", "index": "not_analyzed" },
+        "remote_status" : { "type" : "string", "index": "not_analyzed" },
+        "remote_user" : { "type" : "string", "index": "not_analyzed" },
+        "remote_addr" : { "type" : "ip", "index": "not_analyzed" },
         "nms": {
           "dynamic": true,
           "type": "object",

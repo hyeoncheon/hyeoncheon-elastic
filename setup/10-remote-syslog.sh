@@ -158,6 +158,19 @@ filter {
           remove_tag => [ "_grokparsefailure" ]
         }
       }
+      if "_grokparsefailure" in [tags] and [program] == "sshd" {
+        grok {
+          match => { "message" => "%{WORD:remote_action} %{WORD} for (%{GREEDYDATA:remote_status} )?%{USERNAME:remote_user} from %{IP:remote_addr}" }
+          add_tag => [ "security", "sshd" ]
+          remove_tag => [ "_grokparsefailure" ]
+        }
+        if [remote_action] {
+          mutate {
+            lowercase => [ "remote_action" ]
+            add_field => { "event" => "sshd %{remote_action} for %{remote_user} from %{remote_addr}" }
+          }
+        }
+      }
     }
   }
 }
