@@ -14,6 +14,7 @@ cat <<EOF |sudo tee /etc/apt/sources.list.d/elasticstack-2.x.list
 deb https://packages.elastic.co/elasticsearch/2.x/debian stable main
 deb https://packages.elastic.co/logstash/2.4/debian stable main
 deb https://packages.elastic.co/kibana/4.6/debian stable main
+deb http://packages.elastic.co/curator/4/debian stable main
 EOF
 
 # pre-requirements
