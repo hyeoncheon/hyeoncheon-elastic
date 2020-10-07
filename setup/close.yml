@@ -9,7 +9,7 @@ actions:
   1:
     action: close
     description: >-
-      Close indices older than 30 days (based on index name), for logstash-
+      Close indices older than 14 days (based on index name), for logstash-
       prefixed indices.
     options:
       delete_aliases: False
@@ -26,12 +26,12 @@ actions:
       direction: older
       timestring: '%Y.%m.%d'
       unit: days
-      unit_count: 30
+      unit_count: 14
       exclude:
   2:
     action: close
     description: >-
-      Close indices older than 30 days (based on index name), for logstash-
+      Close indices older than 14 days (based on index name), for logstash-
       prefixed indices.
     options:
       delete_aliases: False
@@ -53,7 +53,7 @@ actions:
   3:
     action: close
     description: >-
-      Close indices older than 30 days (based on index name), for logstash-
+      Close indices older than 14 days (based on index name), for logstash-
       prefixed indices.
     options:
       delete_aliases: False
@@ -75,7 +75,7 @@ actions:
   4:
     action: close
     description: >-
-      Close indices older than 30 days (based on index name), for logstash-
+      Close indices older than 14 days (based on index name), for logstash-
       prefixed indices.
     options:
       delete_aliases: False
@@ -95,7 +95,7 @@ actions:
       unit_count: 31
   5:
     action: delete_indices
-    description: "Delete indices older than 61 days (based on index name)"
+    description: "Delete indices older than 30 days (based on index name)"
     options:
       timeout_override:
       continue_if_exception: True
@@ -110,10 +110,10 @@ actions:
       direction: older
       timestring: '%Y.%m.%d'
       unit: days
-      unit_count: 61
+      unit_count: 30
   6:
     action: delete_indices
-    description: "Delete indices older than 61 days (based on index name)"
+    description: "Delete indices older than 30 days (based on index name)"
     options:
       timeout_override:
       continue_if_exception: True
@@ -128,10 +128,10 @@ actions:
       direction: older
       timestring: '%Y.%m.%d'
       unit: days
-      unit_count: 61
+      unit_count: 30
   7:
     action: delete_indices
-    description: "Delete indices older than 61 days (based on index name)"
+    description: "Delete indices older than 30 days (based on index name)"
     options:
       timeout_override:
       continue_if_exception: True
@@ -146,10 +146,10 @@ actions:
       direction: older
       timestring: '%Y.%m.%d'
       unit: days
-      unit_count: 61
+      unit_count: 30
   8:
     action: delete_indices
-    description: "Delete indices older than 61 days (based on index name)"
+    description: "Delete indices older than 30 days (based on index name)"
     options:
       timeout_override:
       continue_if_exception: True
@@ -164,4 +164,4 @@ actions:
       direction: older
       timestring: '%Y.%m.%d'
       unit: days
-      unit_count: 61
+      unit_count: 30

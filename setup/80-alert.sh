@@ -9,7 +9,7 @@
 cat <<EOF |sudo tee /etc/logstash/conf.d/80-alert.conf
 filter {
   if [type] == "snmp" {
-    if [tx_bps] and ([tx_bps] > $snmp_high_traffic) and [nms][zone] == "fcz" {
+    if [tx_bps] and ([tx_bps] > $snmp_high_traffic) and [nms][zone] != "fcz" and [nms][zone] != "bcz" {
       mutate { add_tag => [ "alert" ] }
       clone {
         add_field => { "trap" => "snmp_high_traffic" }
@@ -46,10 +46,17 @@ filter {
         clones => [ "alert" ]
       }
     }
+    if "alert" in [tags] {
+      clone {
+        add_field => { "trap" => "syslog_alert" }
+        add_field => { "origin" => "syslog" }
+        clones => [ "alert" ]
+      }
+    }
   }
 
   if [type] == "netflow" {
-    if [netflow][in_bytes] and [netflow][in_bytes] >= $netflow_high_traffic and [nms][zone] == "fcz" {
+    if [netflow][in_bytes] and [netflow][in_bytes] >= $netflow_high_traffic and [nms][protocol] != "ESP" {
       mutate { add_tag => [ "alert" ] }
       clone {
         add_field => { "trap" => "netflow_high_traffic" }
@@ -114,10 +121,16 @@ Tx: ' +
           replace => { "alert_color" => "danger" }
         }
       }
+      if "configuration" in [tags] {
+        mutate {
+          add_tag => [ "emerg" ]
+          replace => { "alert_color" => "danger" }
+        }
+      }
     }
-    if [remote_action] and [remote_action] == "failed" {
+    if [remote_action] and [remote_action] == "accepted" {
       mutate {
-        replace => { "alert_color" => "danger" }
+        replace => { "alert_color" => "#cccc00" }
       }
     }
 

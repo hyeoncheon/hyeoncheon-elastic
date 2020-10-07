@@ -150,6 +150,14 @@ filter {
           remove_tag => [ "_grokparsefailure" ]
         }
       }
+      if "_grokparsefailure" in [tags] {
+        grok {
+          match => { "message" => "%{WORD:user} : %{DATA}?/tmp/config.boot" }
+          add_tag => [ "security", "configuration", "alert" ]
+          add_field => { "event" => "configuration changed!" }
+          remove_tag => [ "_grokparsefailure" ]
+        }
+      }
       if "_grokparsefailure" in [tags] and [program] == "sudo" {
         grok {
           match => { "message" => "%{USERNAME:sudo_by} : TTY=%{NOTSPACE:sudo_tty} ; PWD=%{PATH:sudo_pwd} ; USER=%{USERNAME:sudo_user} ; COMMAND=%{GREEDYDATA:sudo_command}" }
